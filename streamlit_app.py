@@ -4,6 +4,9 @@ from scraper_providers import buscar_y_analizar
 # Título de la aplicación
 st.title("Evaluador de Riesgo de Proveedores")
 
+# Configurar Streamlit para minimizar el monitoreo de archivos
+st.set_option("server.fileWatcherType", "none")
+
 # Entrada del usuario
 st.subheader("Introduce el nombre del proveedor que deseas evaluar:")
 nombre_proveedor = st.text_input("Nombre del proveedor:")
