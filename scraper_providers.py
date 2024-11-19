@@ -137,7 +137,7 @@ def filtrar_duplicados(noticias):
 def buscar_y_analizar(nombre_proveedor, meses_atras=12, max_paginas=3):
     if not nombre_proveedor:
         print("Debe proporcionar un nombre de proveedor")
-        return
+        return []
 
     noticias_google = buscar_noticias_google(nombre_proveedor, meses_atras=meses_atras, max_paginas=max_paginas)
     noticias_gnews = buscar_noticias_gnews(nombre_proveedor, meses_atras=meses_atras)
@@ -149,13 +149,8 @@ def buscar_y_analizar(nombre_proveedor, meses_atras=12, max_paginas=3):
 
     resultados.sort(key=lambda x: x["severidad"], reverse=True)
 
-    for resultado in resultados:
-        print(f"Título: {resultado['titulo']}")
-        print(f"Descripción: {resultado['descripcion']}")
-        print(f"Enlace: {resultado['enlace']}")
-        print(f"Riesgos detectados: {', '.join(resultado['riesgos'])}")
-        print(f"Severidad del riesgo: {resultado['severidad']}")
-        print("-" * 80)
+    return resultados
+
 
 if __name__ == "__main__":
     nombre_proveedor = input("Ingrese el nombre del proveedor: ")
