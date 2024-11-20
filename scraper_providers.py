@@ -153,8 +153,10 @@ def buscar_y_analizar(nombre_proveedor, meses_atras=12, max_paginas=3):
 
 def analizar_riesgos_con_huggingface(noticias):
     # Carga el pipeline de Hugging Face con un modelo ligero
-    classifier = pipeline("text-classification", model="distilbert-base-multilingual-cased", tokenizer="distilbert-base-multilingual-cased")
-    
+    #classifier = pipeline("text-classification", model="distilbert-base-multilingual-cased", tokenizer="distilbert-base-multilingual-cased")
+    # Descargado
+    classifier = pipeline("text-classification", model="./models/distilbert", tokenizer="./models/distilbert")
+
     resultados = []
     for noticia in noticias:
         texto = f"{noticia['titulo']} {noticia['descripcion']}"
