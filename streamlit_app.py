@@ -24,9 +24,7 @@ if st.button("Analizar riesgos"):
             for resultado in resultados:
                 st.markdown(f"### {resultado['titulo']}")
                 st.write(f"**Descripción:** {resultado['descripcion']}")
-                st.write(f"**Riesgos detectados:** {', '.join(resultado['riesgos'])}")
-                st.write(f"**Severidad del riesgo:** {resultado['severidad']}")
-                st.markdown(f"[Ver más detalles]({resultado['enlace']})", unsafe_allow_html=True)
+                st.write(f"**Nivel de Riesgo:** {resultado['riesgo']}")
                 st.write("---")
         else:
             st.warning("No se encontraron riesgos significativos.")

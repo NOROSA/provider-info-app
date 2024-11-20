@@ -4,6 +4,7 @@ import spacy
 from datetime import datetime, timedelta
 import subprocess
 import time
+from transformers import pipeline
 
 
 # Intenta cargar el modelo de idioma
@@ -144,11 +145,33 @@ def buscar_y_analizar(nombre_proveedor, meses_atras=12, max_paginas=3):
     noticias_mediastack = buscar_noticias_mediastack(nombre_proveedor, meses_atras=meses_atras)
 
     todas_noticias = filtrar_duplicados(noticias_google + noticias_gnews + noticias_mediastack)
-    resultados = [evaluar_riesgos(noticia) for noticia in todas_noticias]
-    resultados = [res for res in resultados if res["severidad"] > 0]
 
-    resultados.sort(key=lambda x: x["severidad"], reverse=True)
+    # Analiza las noticias con Hugging Face
+    resultados = analizar_riesgos_con_huggingface(todas_noticias)
+    return resultados
 
+
+def analizar_riesgos_con_huggingface(noticias):
+    # Carga el pipeline de Hugging Face con un modelo ligero
+    classifier = pipeline("text-classification", model="distilbert-base-multilingual-cased", tokenizer="distilbert-base-multilingual-cased")
+    
+    resultados = []
+    for noticia in noticias:
+        texto = f"{noticia['titulo']} {noticia['descripcion']}"
+        
+        # Clasifica el texto como positivo o negativo
+        clasificacion = classifier(texto, truncation=True, max_length=512)
+        etiqueta = clasificacion[0]['label']
+        puntuacion = clasificacion[0]['score']
+        
+        # Determina el nivel de riesgo en función de la etiqueta
+        riesgo = 5 if etiqueta == "NEGATIVE" and puntuacion > 0.8 else 3 if etiqueta == "NEGATIVE" else 1
+
+        resultados.append({
+            "titulo": noticia["titulo"],
+            "descripcion": noticia["descripcion"],
+            "riesgo": riesgo
+        })
     return resultados
 
 
