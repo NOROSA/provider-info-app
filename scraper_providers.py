@@ -42,7 +42,12 @@ def buscar_noticias_google(nombre_proveedor, meses_atras=12, max_paginas=3):
             titulo = item.find("h3").get_text() if item.find("h3") else "Sin título"
             enlace = item.find("a")["href"] if item.find("a") else "Sin enlace"
             descripcion = item.find("span", class_="aCOpRe").get_text() if item.find("span", class_="aCOpRe") else "Sin descripción"
-            noticias.append({"titulo": titulo, "enlace": enlace, "descripcion": descripcion})
+            noticias.append({
+                    "titulo": titulo,
+                    "enlace": enlace,
+                    "descripcion": descripcion,
+                    "fecha": "Fecha no disponible para GOOGLE SEARCH"  # Google Search no incluye fecha en el scraping directo
+            })
 
         time.sleep(2)
     return noticias
@@ -66,7 +71,8 @@ def buscar_noticias_gnews(nombre_proveedor, meses_atras=12, max_resultados=50):
             noticias.append({
                 "titulo": article.get("title", "Sin título"),
                 "enlace": article.get("url", "Sin enlace"),
-                "descripcion": article.get("description", "Sin descripción")
+                "descripcion": article.get("description", "Sin descripción"),
+                        "fecha": article.get("publishedAt", "Fecha no disponible")
             })
         return noticias
     else:
@@ -94,7 +100,8 @@ def buscar_noticias_mediastack(nombre_proveedor, meses_atras=12, max_resultados=
             noticias.append({
                 "titulo": article.get("title", "Sin título"),
                 "enlace": article.get("url", "Sin enlace"),
-                "descripcion": article.get("description", "Sin descripción")
+                "descripcion": article.get("description", "Sin descripción"),
+                "fecha": article.get("published_at", "Fecha no disponible") 
             })
         return noticias
     else:
@@ -124,20 +131,24 @@ def evaluar_riesgos(noticia):
     riesgos_detectados = analizar_riesgos(texto_analizar)
     severidad = len(riesgos_detectados)
 
+    descripcion_actualizada = (
+        f"Palabras clave detectadas: {', '.join(riesgos_detectados)}"
+        if riesgos_detectados
+        else "No se encontraron palabras clave de riesgo en el texto."
+    )
+
     return {
         "titulo": noticia.get("titulo", "Sin título"),
-        "descripcion": (
-            f"Palabras clave detectadas: {', '.join(riesgos_detectados)}"
-            if riesgos_detectados
-            else "No se encontraron palabras clave de riesgo en el texto."
-        ),
+        "descripcion": descripcion_actualizada,  # Actualizamos con palabras clave
         "enlace": noticia.get(
             "enlace",
             "No se proporcionó un enlace. Esto puede deberse a restricciones de la fuente o problemas en la búsqueda."
         ),
+        "fecha": noticia.get("fecha", "Fecha no disponible"),  # Añadir la fecha si existe
         "riesgos": riesgos_detectados,
         "severidad": severidad
     }
+
 
 def filtrar_duplicados(noticias):
     enlaces_vistos = set()
@@ -175,19 +186,25 @@ def analizar_riesgos_con_huggingface(noticias):
         puntuacion = clasificacion[0]['score']
         riesgo = 5 if etiqueta == "NEGATIVE" and puntuacion > 0.8 else 3 if etiqueta == "NEGATIVE" else 1
 
+        # Analizar las palabras clave con SpaCy
+        riesgos_detectados = analizar_riesgos(texto)
+
         resultados.append({
             "titulo": noticia.get("titulo", "Sin título"),
-            "descripcion": noticia.get(
-                "descripcion", 
-                "No se encontró una descripción. Esto puede deberse a una limitación en la fuente."
+            "descripcion": (
+                f"Palabras clave detectadas: {', '.join(riesgos_detectados)}"
+                if riesgos_detectados
+                else "No se encontraron palabras clave de riesgo en el texto."
             ),
             "enlace": noticia.get(
-                "enlace", 
+                "enlace",
                 "No se proporcionó un enlace. Esto puede deberse a restricciones de la fuente o problemas en la búsqueda."
             ),
+            "fecha": noticia.get("fecha", "Fecha no disponible"),
             "riesgo": riesgo
         })
     return resultados
+
 
 
 if __name__ == "__main__":
