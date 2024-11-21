@@ -115,16 +115,24 @@ def analizar_riesgos(texto):
     return riesgos
 
 def evaluar_riesgos(noticia):
-    texto_analizar = f"{noticia['titulo']} {noticia['descripcion']}"
+    texto_analizar = f"{noticia.get('titulo', '')} {noticia.get('descripcion', '')}"
     riesgos_detectados = analizar_riesgos(texto_analizar)
     severidad = len(riesgos_detectados)
+
     return {
-        "titulo": noticia["titulo"],
-        "enlace": noticia["enlace"],
-        "descripcion": noticia["descripcion"],
+        "titulo": noticia.get("titulo", "Sin título"),
+        "descripcion": noticia.get(
+            "descripcion", 
+            "No se encontró una descripción. Esto puede deberse a una limitación en la fuente."
+        ),
+        "enlace": noticia.get(
+            "enlace", 
+            "No se proporcionó un enlace. Esto puede deberse a restricciones de la fuente o problemas en la búsqueda."
+        ),
         "riesgos": riesgos_detectados,
         "severidad": severidad
     }
+
 
 def filtrar_duplicados(noticias):
     enlaces_vistos = set()
@@ -152,29 +160,27 @@ def buscar_y_analizar(nombre_proveedor, meses_atras=12, max_paginas=3):
 
 
 def analizar_riesgos_con_huggingface(noticias):
-    # Carga el pipeline de Hugging Face con un modelo ligero
-
-    #classifier = pipeline("text-classification", model="distilbert-base-multilingual-cased", tokenizer="distilbert-base-multilingual-cased")
-    # Descargado
     classifier = pipeline("text-classification", model="./models/distilbert", tokenizer="./models/distilbert")
 
     resultados = []
     for noticia in noticias:
-        texto = f"{noticia['titulo']} {noticia['descripcion']}"
-        
-        # Clasifica el texto como positivo o negativo
+        texto = f"{noticia.get('titulo', '')} {noticia.get('descripcion', '')}"
         clasificacion = classifier(texto, truncation=True, max_length=512)
         etiqueta = clasificacion[0]['label']
         puntuacion = clasificacion[0]['score']
-        
-        # Determina el nivel de riesgo en función de la etiqueta
         riesgo = 5 if etiqueta == "NEGATIVE" and puntuacion > 0.8 else 3 if etiqueta == "NEGATIVE" else 1
 
         resultados.append({
-            "titulo": noticia["titulo"],
-            "descripcion": noticia["descripcion"],
-            "riesgo": riesgo,
-             "enlace": noticia["enlace"]
+            "titulo": noticia.get("titulo", "Sin título"),
+            "descripcion": noticia.get(
+                "descripcion", 
+                "No se encontró una descripción. Esto puede deberse a una limitación en la fuente."
+            ),
+            "enlace": noticia.get(
+                "enlace", 
+                "No se proporcionó un enlace. Esto puede deberse a restricciones de la fuente o problemas en la búsqueda."
+            ),
+            "riesgo": riesgo
         })
     return resultados
 
