@@ -105,11 +105,16 @@ def buscar_noticias_mediastack(nombre_proveedor, meses_atras=12, max_resultados=
 def analizar_riesgos(texto):
     doc = nlp(texto)
     palabras_clave = [
-        "fraude", "riesgo", "problema", "quiebra", "investigación", "conflicto",
-        "sanción", "demanda", "juicio", "multa", "disrupción", "interrupción",
-        "fallo", "penalización", "multas", "reputación", "tributario", "evasión",
-        "suspensión", "paralización", "deuda", "morosidad", "incumplimiento",
-        "hackeo", "filtración", "estafa", "corrupción", "soborno", "incidente", "bancarrota"
+    # Español
+    "fraude", "riesgo", "problema", "quiebra", "investigación", "conflicto",
+    "sanción", "demanda", "juicio", "multa", "disrupción", "interrupción",
+    "fallo", "penalización", "multas", "reputación", "tributario", "evasión",
+    "suspensión", "deuda", "morosidad", "hackeo", "estafa", "corrupción", "soborno", "incidente",
+    # Inglés
+    "fraud", "risk", "problem", "bankruptcy", "investigation", "conflict",
+    "sanction", "lawsuit", "trial", "fine", "disruption", "interruption",
+    "failure", "penalty", "reputation", "tax", "evasion", "suspension",
+    "debt", "default", "hacking", "scam", "corruption", "bribery", "incident"
     ]
     riesgos = [token.text for token in doc if token.text.lower() in palabras_clave]
     return riesgos
@@ -121,17 +126,19 @@ def evaluar_riesgos(noticia):
 
     return {
         "titulo": noticia.get("titulo", "Sin título"),
-        "descripcion": noticia.get(
-            "descripcion", 
-            "No se encontró una descripción. Esto puede deberse a una limitación en la fuente."
+        "descripcion": (
+            f"Palabras clave detectadas: {', '.join(riesgos_detectados)}"
+            if riesgos_detectados
+            else "No se encontraron palabras clave de riesgo en el texto."
         ),
         "enlace": noticia.get(
-            "enlace", 
+            "enlace",
             "No se proporcionó un enlace. Esto puede deberse a restricciones de la fuente o problemas en la búsqueda."
         ),
         "riesgos": riesgos_detectados,
         "severidad": severidad
     }
+
 
 
 def filtrar_duplicados(noticias):

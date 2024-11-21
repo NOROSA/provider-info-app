@@ -26,11 +26,11 @@ if st.button("Analizar riesgos"):
                 st.write(f"**Descripción:** {resultado['descripcion']}")
                 st.write(f"**Nivel de Riesgo:** {resultado['riesgo']}")
 
-                # Mostrar el enlace si está disponible
                 if resultado['enlace'].startswith("http"):
                     st.markdown(f"[Enlace a la fuente]({resultado['enlace']})", unsafe_allow_html=True)
                 else:
                     st.write(f"**Nota:** {resultado['enlace']}")
+
                 st.write("---")
         else:
             st.warning("No se encontraron riesgos significativos.")
