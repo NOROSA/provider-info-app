@@ -139,8 +139,6 @@ def evaluar_riesgos(noticia):
         "severidad": severidad
     }
 
-
-
 def filtrar_duplicados(noticias):
     enlaces_vistos = set()
     noticias_unicas = []

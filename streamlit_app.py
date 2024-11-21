@@ -17,12 +17,12 @@ if st.button("Analizar riesgos"):
         st.write(f"Buscando información para: **{nombre_proveedor}**...")
         with st.spinner("Analizando datos, por favor espera..."):
             resultados = buscar_y_analizar(nombre_proveedor, meses_atras=meses)
-
         # Mostrar resultados
         if resultados:
             st.success(f"Se encontraron {len(resultados)} resultados relevantes.")
             for resultado in resultados:
                 st.markdown(f"### {resultado['titulo']}")
+                st.write(f"**Fecha:** {resultado.get('fecha', 'Fecha no disponible')}")
                 st.write(f"**Descripción:** {resultado['descripcion']}")
                 st.write(f"**Nivel de Riesgo:** {resultado['riesgo']}")
 
