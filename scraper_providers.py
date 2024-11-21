@@ -173,7 +173,8 @@ def analizar_riesgos_con_huggingface(noticias):
         resultados.append({
             "titulo": noticia["titulo"],
             "descripcion": noticia["descripcion"],
-            "riesgo": riesgo
+            "riesgo": riesgo,
+             "enlace": noticia["enlace"]
         })
     return resultados
 
